@@ -6,7 +6,7 @@ AI-Based Website DOM Change Detection tool built with .NET 10.
 
 - Headless browser page loading via PuppeteerSharp
 - Stealth mode JavaScript injection to avoid bot detection
-- DOM extraction and tree building using HtmlAgilityPack
+- DOM extraction and tree building using HtmlAgilityPack **(check AngleSharp)**
 - Snapshot persistence as JSON files
 - Change detection between snapshots (added, removed, modified nodes)
 
