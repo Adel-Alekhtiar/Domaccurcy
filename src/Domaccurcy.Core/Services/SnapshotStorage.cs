@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Domaccurcy.Core.Models;
 using Newtonsoft.Json;
@@ -48,7 +50,9 @@ namespace Domaccurcy.Core.Services
             try
             {
                 var uri = new Uri(url);
-                return uri.Host.Replace(".", "_").Replace("-", "_");
+                var host = uri.Host.ToLowerInvariant();
+                var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(host)))[..8];
+                return $"{host.Replace(".", "_").Replace("-", "_")}_{hash}";
             }
             catch
             {

@@ -7,9 +7,11 @@ namespace Domaccurcy.Core.Services
 {
     public class WebsiteLoader
     {
+        private static readonly Task _browserReady = new BrowserFetcher().DownloadAsync();
+
         public async Task<DomSnapshot> LoadAsync(string url)
         {
-            await new BrowserFetcher().DownloadAsync();
+            await _browserReady;
 
             var launchOptions = new LaunchOptions
             {
