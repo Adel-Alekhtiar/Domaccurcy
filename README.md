@@ -1,6 +1,6 @@
 # Domaccurcy
 
-AI-Based Website DOM Change Detection tool built with .NET 8.
+AI-Based Website DOM Change Detection tool built with .NET 10.
 
 ## Features
 
@@ -12,7 +12,7 @@ AI-Based Website DOM Change Detection tool built with .NET 8.
 
 ## Requirements
 
-- .NET 8.0 SDK
+- .NET 10.0 SDK
 
 ## Usage
 
