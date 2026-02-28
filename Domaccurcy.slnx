@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Domaccurcy.App/Domaccurcy.App.csproj" />
+    <Project Path="src/Domaccurcy.Core/Domaccurcy.Core.csproj" />
+  </Folder>
+</Solution>
