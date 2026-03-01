@@ -10,44 +10,90 @@ namespace Domaccurcy.Core.Services
         {
             var changes = new List<DomChange>();
 
-            var oldNodes = FlattenNodes(oldSnapshot.Nodes).ToDictionary(n => n.XPath, n => n);
-            var newNodes = FlattenNodes(newSnapshot.Nodes).ToDictionary(n => n.XPath, n => n);
+            var oldNodes = FlattenNodes(oldSnapshot.Nodes)
+                .GroupBy(n => n.XPath)
+                .ToDictionary(g => g.Key, g => g.ToList());
+            var newNodes = FlattenNodes(newSnapshot.Nodes)
+                .GroupBy(n => n.XPath)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
             // Detect removed nodes
-            foreach (var (xpath, oldNode) in oldNodes)
+            foreach (var (xpath, oldNodeList) in oldNodes)
             {
-                if (!newNodes.ContainsKey(xpath))
+                if (!newNodes.TryGetValue(xpath, out var newNodeList))
                 {
-                    changes.Add(new DomChange
+                    // All nodes with this xpath were removed
+                    foreach (var oldNode in oldNodeList)
                     {
-                        ChangeType = ChangeType.Removed,
-                        OldNode = oldNode,
-                        XPath = xpath
-                    });
+                        changes.Add(new DomChange
+                        {
+                            ChangeType = ChangeType.Removed,
+                            OldNode = oldNode,
+                            XPath = xpath
+                        });
+                    }
+                }
+                else
+                {
+                    // Some nodes might have been removed if counts differ
+                    for (int i = newNodeList.Count; i < oldNodeList.Count; i++)
+                    {
+                        changes.Add(new DomChange
+                        {
+                            ChangeType = ChangeType.Removed,
+                            OldNode = oldNodeList[i],
+                            XPath = xpath
+                        });
+                    }
                 }
             }
 
             // Detect added or modified nodes
-            foreach (var (xpath, newNode) in newNodes)
+            foreach (var (xpath, newNodeList) in newNodes)
             {
-                if (!oldNodes.TryGetValue(xpath, out var oldNode))
+                if (!oldNodes.TryGetValue(xpath, out var oldNodeList))
                 {
-                    changes.Add(new DomChange
+                    // All nodes with this xpath were added
+                    foreach (var newNode in newNodeList)
                     {
-                        ChangeType = ChangeType.Added,
-                        NewNode = newNode,
-                        XPath = xpath
-                    });
+                        changes.Add(new DomChange
+                        {
+                            ChangeType = ChangeType.Added,
+                            NewNode = newNode,
+                            XPath = xpath
+                        });
+                    }
                 }
-                else if (IsModified(oldNode, newNode))
+                else
                 {
-                    changes.Add(new DomChange
+                    // Check for modifications and additions
+                    int minCount = System.Math.Min(oldNodeList.Count, newNodeList.Count);
+                    
+                    // Compare existing nodes
+                    for (int i = 0; i < minCount; i++)
                     {
-                        ChangeType = ChangeType.Modified,
-                        OldNode = oldNode,
-                        NewNode = newNode,
-                        XPath = xpath
-                    });
+                        if (IsModified(oldNodeList[i], newNodeList[i]))
+                        {
+                            changes.Add(new DomChange
+                            {
+                                ChangeType = ChangeType.Modified,
+                                OldNode = oldNodeList[i],
+                                NewNode = newNodeList[i],
+                                XPath = xpath
+                            });
+                        }
+                    }
+                    
+                    // Add new nodes if count increased
+                    for (int i = oldNodeList.Count; i < newNodeList.Count; i++)
+                    {
+                        changes.Add(new DomChange
+                        {
+                            ChangeType = ChangeType.Added,
+                            NewNode = newNodeList[i],
+                            XPath = xpath
+                        });
+                    }
                 }
             }
 
