@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Domaccurcy.Core.Models;
@@ -8,6 +9,7 @@ namespace Domaccurcy.App
 {
     class Program
     {
+        private static readonly string parentDirectory = Directory.GetCurrentDirectory() + "\\snapshots";
         static async Task Main(string[] args)
         {
             Console.WriteLine("=== Domaccurcy - AI-Based Website DOM Change Detection ===");
@@ -37,7 +39,7 @@ namespace Domaccurcy.App
 
             var loader = new WebsiteLoader();
             var extractor = new DomExtractor();
-            var storage = new SnapshotStorage();
+            var storage = new SnapshotStorage(parentDirectory);
             var detector = new ChangeDetector();
 
             // Load previous snapshot
